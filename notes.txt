@@ -1,0 +1,57 @@
+Sliding Puzzle
+
+Functionality:
+- User input image (or just number mode)
+- User input size of puzzle (2x2 to mxn)
+- Generate puzzle with cropped image
+
+- In game options
+    - Arrow keys to slide the block
+    - Side bar
+        - Moves counter
+        - Reshuffle
+        - Restart
+        - 
+
+
+
+Implementation:
+- Image processing
+
+
+- Grid (independent from image?)
+    - 2D list of integers represent order
+    - Separation between blocks
+        - Static thin black lines on grid (make img/block smaller with margin or just overlay the lines)
+        - boarder around each image block
+
+- Puzzle game
+    - forms the logic of the game
+        - shuffle the blocks
+        - enable movement/ animation
+        - end when order is resumed
+
+image[][]: img object
+0 1 2
+3 4 5
+6 7 8
+
+
+grid[][]: int
+0 1 2
+3 4 5
+6 7 *
+
+use grid for arrangement of blocks
+display according to grid elements (correspond to each img object)
+
+e.g. move 5 down (swap 5 and *)
+grid[][]: int
+0 1 2
+3 4 *
+6 7 5
+now it displays by walking thru grid to show img object in that order
+
+
+
+each move is a swap with empty(*)
