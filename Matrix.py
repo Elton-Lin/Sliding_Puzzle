@@ -5,10 +5,10 @@ class Matrix:
     # grid is a 2D list (maybe should use an array)
     grid = []
 
-    def __init__(self, width, height):
+    def __init__(self, height, width):
 
-        self.width = width
         self.height = height
+        self.width = width
         self.fill_grid()
 
     def fill_grid(self):

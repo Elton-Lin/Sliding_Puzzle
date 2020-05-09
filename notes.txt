@@ -55,3 +55,7 @@ now it displays by walking thru grid to show img object in that order
 
 
 each move is a swap with empty(*)
+
+
+Variable naming
+- id instead of position?

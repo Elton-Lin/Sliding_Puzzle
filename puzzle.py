@@ -6,17 +6,20 @@ import Matrix as mat
 class Game(tk.Tk):
 
 
-    def __init__(self):
+    def __init__(self, num_row, num_col):
 
         tk.Tk.__init__(self)
 
         # backend grid setup
-        self.board = mat.Matrix(3, 3)
+        self.num_row = num_row
+        self.num_col = num_col
+        self.board = mat.Matrix(num_row, num_col)
         self.board.print_grid()
 
         # most important variable
-        self.empty_pos = 8 # positioin of the only empty block
-        self.offset = 0
+        # positioin of the only empty block
+        self.empty_pos = self.num_row * self.num_col - 1
+        self.num_incorrect = 0
 
         # tkinter canvas setup
         self.canv = tk.Canvas(self, width=200, height=200)
@@ -37,17 +40,41 @@ class Game(tk.Tk):
         moving_block_pos = self.empty_pos + offset
         moving_elem = self.board.get_element(moving_block_pos)
 
+        # every move of a block has 3 different results
+        # - block moves from
+        # 1. incorrect position into correct position
+        # 2. incorrect position into another incorrect position
+        # 3. correct position into incorrect position
+        # (correct position is unique)
+
         # no
         if moving_elem != moving_block_pos:
-            if moving_elem == self.empty_pos: # no to yes
-                self.offset += 1
-            else: # no to no
+            if moving_elem == self.empty_pos: # 1.
+                self.num_incorrect -= 1
+            else: # 2.
                 pass
-        else: # yes to no
-            self.offset -= 1
+        else: # 3.
+            self.num_incorrect += 1
 
         self.board.swap(moving_block_pos, self.empty_pos)
         self.empty_pos = moving_block_pos
+
+
+
+    def can_move(self, offset_row, offset_col):
+        
+        # print("checking", self.empty_pos)
+        coord = self.board.convert(self.empty_pos)
+        # print("coord:", coord[0], coord[1])
+
+        new_row = coord[0] + offset_row
+        new_col = coord[1] + offset_col
+
+        if new_row >= 0 and new_row < num_row and\
+           new_col >= 0 and new_col < num_col:
+            return True
+        else:
+            return False
 
 
 
@@ -57,28 +84,32 @@ class Game(tk.Tk):
         if key == "Left":
             self.canv.move(self.block, -20, 0)     
 
-            # can_move()
-            # calculate offset: left, right (+-1), up, down (+- width)
-            self.update_board(1)
+            if self.can_move(0, 1):
+                # calculate offset: left, right (+-1), up, down (+- width)
+                self.update_board(1)
+                # move the block in display
             
 
         elif key == "Right":
             self.canv.move(self.block, 20, 0)
             
-            self.update_board(-1)
+            if self.can_move(0, -1):
+                self.update_board(-1)
 
         elif key == "Up":
             self.canv.move(self.block, 0, -20)
 
-            self.update_board(3)
+            if self.can_move(1, 0):
+                self.update_board(self.num_col)
 
         elif key == "Down":
             self.canv.move(self.block, 0, 20)
 
-            self.update_board(-3)
+            if self.can_move(-1, 0):
+                self.update_board(-1 * self.num_col)
         
         self.board.print_grid()
-        print("offset:", self.offset)
+        print("number of incorrect blocks:", self.num_incorrect)
 
 
     # testing purposes
@@ -95,8 +126,10 @@ if __name__ == '__main__':
     # image processing - crop image and store as blocks
     # pass blocks to game for display and animation
     
+    num_row = 4
+    num_col = 3
 
-    game = Game()
+    game = Game(num_row, num_col)
     c = 0
     while True:
         game.update_idletasks()
