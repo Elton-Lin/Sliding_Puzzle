@@ -5,7 +5,7 @@ import Matrix as mat
 
 class Game(tk.Tk):
 
-
+    # avoid logic in constructor, use another function
     def __init__(self, num_row, num_col):
 
         tk.Tk.__init__(self)
@@ -22,16 +22,61 @@ class Game(tk.Tk):
         self.num_incorrect = 0
 
         # tkinter canvas setup
-        self.canv = tk.Canvas(self, width=200, height=200)
+        self.canv = tk.Canvas(self, width=720, height=720)
 
         # pack and grid are geometric managers
         # self.canv.grid(row = 3, col = 3)
         self.canv.pack(fill="both", expand=True)
 
-        self.img_src = ImageTk.PhotoImage(Image.open("blue_square.png"))
-        self.block = self.canv.create_image(20, 20, anchor='nw', image=self.img_src)
+        # image setup
+        self.img_src = Image.open("m5.jpg")
+        # for saving img objects references, otherwise, it won't be displayed on tk
+        self.cropped_imgs = []
+        self.blocks = []
+
+        self.block_width = 0
+        self.block_height = 0
+
+
+        # self.img = ImageTk.PhotoImage(Image.open("blue_square.png"))
+        # self.block = self.canv.create_image(20, 20, anchor='nw', image=self.img)
+
+        # cropped_img = self.img_src.crop((0,0,50,50))
+        # self.tk_img = ImageTk.PhotoImage(cropped_img)
+        # self.block2 = self.canv.create_image(20, 20, anchor='nw', image=self.tk_img)
         
         self.bind("<Key>", self.move_block)
+
+        self.image_processing()
+
+
+    def image_processing(self):
+
+        # might also need resizing
+
+        # partition image and assign each cropped images to list
+        # deal with precission and rounding error later
+        self.block_width = self.img_src.width // self.num_col
+        self.block_height = self.img_src.height // self.num_row
+
+        for i in range(self.num_row):
+            for j in range(self.num_col):
+
+                # omit the last block (right corner)
+                if i == self.num_row - 1 and j == self.num_col - 1:
+                    break
+
+                coord = (j * self.block_width, i * self.block_height,\
+                        (j + 1) * self.block_width, (i + 1) * self.block_height)
+                print(coord)
+
+                cropped_img = self.img_src.crop(coord)
+                tk_img = ImageTk.PhotoImage(cropped_img)
+                self.cropped_imgs.append(tk_img)
+
+                block = self.canv.create_image(coord[0], coord[1], anchor='nw', image=tk_img)
+                self.blocks.append(block)
+                
 
 
     # fix variables names
@@ -82,30 +127,45 @@ class Game(tk.Tk):
 
         key = event.keysym
         if key == "Left":
-            self.canv.move(self.block, -20, 0)     
+            # self.canv.move(self.block, -20, 0)   
 
             if self.can_move(0, 1):
+
+                # move the block in display
+                index = self.board.get_element(self.empty_pos + 1)
+                self.canv.move(self.blocks[index], -1 * self.block_width, 0)
                 # calculate offset: left, right (+-1), up, down (+- width)
                 self.update_board(1)
-                # move the block in display
+                
+                
             
 
         elif key == "Right":
-            self.canv.move(self.block, 20, 0)
+            # self.canv.move(self.block, 20, 0)
             
             if self.can_move(0, -1):
+                
+                index = self.board.get_element(self.empty_pos - 1)
+                self.canv.move(self.blocks[index], self.block_width, 0)
                 self.update_board(-1)
+                # print("empty pos:", self.empty_pos)
+                # self.canv.move(self.blocks[self.empty_pos], self.block_width, 0)
+                # print("empty pos after:", self.empty_pos)   
 
         elif key == "Up":
-            self.canv.move(self.block, 0, -20)
+            # self.canv.move(self.block, 0, -20)
 
             if self.can_move(1, 0):
+                index = self.board.get_element(self.empty_pos + self.num_col)
+                self.canv.move(self.blocks[index], 0, -1 * self.block_height)
                 self.update_board(self.num_col)
 
         elif key == "Down":
-            self.canv.move(self.block, 0, 20)
+            # self.canv.move(self.block, 0, 20)
 
             if self.can_move(-1, 0):
+                index = self.board.get_element(self.empty_pos - self.num_col)
+                self.canv.move(self.blocks[index], 0, self.block_height)
                 self.update_board(-1 * self.num_col)
         
         self.board.print_grid()

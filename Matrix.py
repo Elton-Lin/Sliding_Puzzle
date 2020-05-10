@@ -9,8 +9,9 @@ class Matrix:
 
         self.height = height
         self.width = width
-        self.fill_grid()
+        self.fill_grid() # be optional?, user cast
 
+    # fill the matrix with 0 to width * height - 1
     def fill_grid(self):
 
         for i in range(self.height):
