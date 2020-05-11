@@ -1,5 +1,9 @@
 Sliding Puzzle
 
+
+* tall image is sometimes automatically rotated in PIL
+* https://stackoverflow.com/questions/4228530/pil-thumbnail-is-rotating-my-image
+
 Functionality:
 - User input image (or just number mode)
 - User input size of puzzle (2x2 to mxn)

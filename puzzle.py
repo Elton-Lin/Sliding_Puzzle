@@ -1,6 +1,8 @@
 import tkinter as tk
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageOps
+import random as rand
 import Matrix as mat
+
 
 
 class Game(tk.Tk):
@@ -20,41 +22,58 @@ class Game(tk.Tk):
         # positioin of the only empty block
         self.empty_pos = self.num_row * self.num_col - 1
         self.num_incorrect = 0
-
-        # tkinter canvas setup
-        self.canv = tk.Canvas(self, width=720, height=720)
-
-        # pack and grid are geometric managers
-        # self.canv.grid(row = 3, col = 3)
-        self.canv.pack(fill="both", expand=True)
+        self.MAXSIZE = 760        
 
         # image setup
-        self.img_src = Image.open("m5.jpg")
+        self.img_src = Image.open("images/hat.jpg")
         # for saving img objects references, otherwise, it won't be displayed on tk
         self.cropped_imgs = []
         self.blocks = []
 
         self.block_width = 0
         self.block_height = 0
-
-
-        # self.img = ImageTk.PhotoImage(Image.open("blue_square.png"))
-        # self.block = self.canv.create_image(20, 20, anchor='nw', image=self.img)
-
-        # cropped_img = self.img_src.crop((0,0,50,50))
-        # self.tk_img = ImageTk.PhotoImage(cropped_img)
-        # self.block2 = self.canv.create_image(20, 20, anchor='nw', image=self.tk_img)
         
         self.bind("<Key>", self.move_block)
 
+
+
+    def resize_img(self):
+        
+        width = self.img_src.width
+        height = self.img_src.height
+        
+        # rescale width and height with same value to keep image undistorted
+        scale = max(width, height) // self.MAXSIZE
+        new_width = int(width // scale)
+        new_height = int(height // scale)
+
+        self.img_src = self.img_src.resize((new_width, new_height))
+
+
+
+    # 1. Fix RGBA conditionally
+    # 2. Resize image conditionally
+    # 3. Canvas setup
+    # 4. Image processing - ...
+    def pre_processing(self):
+
+        # might want to add the transparent RGBA conversion (flattenAlpha)
+
+        # Resize to predetermined max size if img too large
+        if max(self.img_src.width, self.img_src.height) > self.MAXSIZE:
+            self.resize_img()
+
+        # tkinter canvas setup
+        # pack and grid are geometric managers
+        self.canv = tk.Canvas(self, width=self.img_src.width, height=self.img_src.height)
+        self.canv.pack(fill="both", expand=True)
+
         self.image_processing()
-
-
+        
+    # partition image and assign each cropped images as blocks to a list
+    # draws the tk_image blocks on canvas        
     def image_processing(self):
 
-        # might also need resizing
-
-        # partition image and assign each cropped images to list
         # deal with precission and rounding error later
         self.block_width = self.img_src.width // self.num_col
         self.block_height = self.img_src.height // self.num_row
@@ -71,13 +90,17 @@ class Game(tk.Tk):
                 print(coord)
 
                 cropped_img = self.img_src.crop(coord)
-                tk_img = ImageTk.PhotoImage(cropped_img)
+
+                strip_border = ImageOps.crop(cropped_img, border=5)
+                add_border = ImageOps.expand(strip_border, border=5)
+
+                tk_img = ImageTk.PhotoImage(add_border)
                 self.cropped_imgs.append(tk_img)
 
                 block = self.canv.create_image(coord[0], coord[1], anchor='nw', image=tk_img)
                 self.blocks.append(block)
-                
 
+        # self.canv.create_line([50, 50, 50, 150])
 
     # fix variables names
     def update_board(self, offset):
@@ -127,7 +150,6 @@ class Game(tk.Tk):
 
         key = event.keysym
         if key == "Left":
-            # self.canv.move(self.block, -20, 0)   
 
             if self.can_move(0, 1):
 
@@ -137,11 +159,8 @@ class Game(tk.Tk):
                 # calculate offset: left, right (+-1), up, down (+- width)
                 self.update_board(1)
                 
-                
-            
 
         elif key == "Right":
-            # self.canv.move(self.block, 20, 0)
             
             if self.can_move(0, -1):
                 
@@ -153,7 +172,6 @@ class Game(tk.Tk):
                 # print("empty pos after:", self.empty_pos)   
 
         elif key == "Up":
-            # self.canv.move(self.block, 0, -20)
 
             if self.can_move(1, 0):
                 index = self.board.get_element(self.empty_pos + self.num_col)
@@ -161,7 +179,6 @@ class Game(tk.Tk):
                 self.update_board(self.num_col)
 
         elif key == "Down":
-            # self.canv.move(self.block, 0, 20)
 
             if self.can_move(-1, 0):
                 index = self.board.get_element(self.empty_pos - self.num_col)
@@ -172,11 +189,20 @@ class Game(tk.Tk):
         print("number of incorrect blocks:", self.num_incorrect)
 
 
+    def shuffle(self):
+
+        num_shuffle = self.num_col * self.num_row * 2
+        for i in range(num_shuffle):
+            pass
+
+
     # testing purposes
     def draw_rect(self):
 
         self.canv.create_rectangle(20, 20, 40, 40, fill='red')
 
+
+import sys
 
 if __name__ == '__main__':
 
@@ -186,10 +212,25 @@ if __name__ == '__main__':
     # image processing - crop image and store as blocks
     # pass blocks to game for display and animation
     
+    # ----User input processing---
+    # if len(sys.argv) != 2:
+    #     print("Exiting...\nUsage: python3 puzzle.py path_to_img")
+    #     exit()
+
+    # img_path = sys.argv[1]
+
+    # print("Emter the dimensions to create a m x n puzzle")
+    # num_row = int(input("m (row): "))
+    # num_col = int(input("n (col): "))
+    # if num_row < 2 or num_col < 2:
+    #     print("Really? puzzle size needs to be greater than 2 x 2")
+    #     exit()
+
     num_row = 4
     num_col = 3
 
     game = Game(num_row, num_col)
+    game.pre_processing()
     c = 0
     while True:
         game.update_idletasks()
