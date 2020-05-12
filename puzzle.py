@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import ImageTk, Image, ImageOps
 import random as rand
 import Matrix as mat
+import time
 
 
 
@@ -32,6 +33,10 @@ class Game(tk.Tk):
 
         self.block_width = 0
         self.block_height = 0
+
+        self.canv = None
+        self.button = tk.Button(self, text = 'Shuffle', command=self.shuffle)
+        self.button.pack()
         
         self.bind("<Key>", self.move_block)
 
@@ -69,6 +74,9 @@ class Game(tk.Tk):
         self.canv.pack(fill="both", expand=True)
 
         self.image_processing()
+        
+        # create a button for shuffle instead
+        # self.shuffle()
         
     # partition image and assign each cropped images as blocks to a list
     # draws the tk_image blocks on canvas        
@@ -145,6 +153,32 @@ class Game(tk.Tk):
             return False
 
 
+    def move_left(self):
+
+        # move the block in display
+        index = self.board.get_element(self.empty_pos + 1)
+        self.canv.move(self.blocks[index], -1 * self.block_width, 0)
+        # calculate offset: left, right (+-1), up, down (+- width)
+        self.update_board(1)
+
+    def move_right(self):
+
+        index = self.board.get_element(self.empty_pos - 1)
+        self.canv.move(self.blocks[index], self.block_width, 0)
+        self.update_board(-1)
+
+    def move_up(self):
+
+        index = self.board.get_element(self.empty_pos + self.num_col)
+        self.canv.move(self.blocks[index], 0, -1 * self.block_height)
+        self.update_board(self.num_col)
+
+    def move_down(self):
+
+        index = self.board.get_element(self.empty_pos - self.num_col)
+        self.canv.move(self.blocks[index], 0, self.block_height)
+        self.update_board(-1 * self.num_col)
+
 
     def move_block(self, event):
 
@@ -153,47 +187,60 @@ class Game(tk.Tk):
 
             if self.can_move(0, 1):
 
-                # move the block in display
-                index = self.board.get_element(self.empty_pos + 1)
-                self.canv.move(self.blocks[index], -1 * self.block_width, 0)
-                # calculate offset: left, right (+-1), up, down (+- width)
-                self.update_board(1)
+                # # move the block in display
+                # index = self.board.get_element(self.empty_pos + 1)
+                # self.canv.move(self.blocks[index], -1 * self.block_width, 0)
+                # # calculate offset: left, right (+-1), up, down (+- width)
+                # self.update_board(1)
+                self.move_left()
                 
 
         elif key == "Right":
             
-            if self.can_move(0, -1):
-                
-                index = self.board.get_element(self.empty_pos - 1)
-                self.canv.move(self.blocks[index], self.block_width, 0)
-                self.update_board(-1)
-                # print("empty pos:", self.empty_pos)
-                # self.canv.move(self.blocks[self.empty_pos], self.block_width, 0)
-                # print("empty pos after:", self.empty_pos)   
+            if self.can_move(0, -1):   
+                self.move_right()
 
         elif key == "Up":
 
             if self.can_move(1, 0):
-                index = self.board.get_element(self.empty_pos + self.num_col)
-                self.canv.move(self.blocks[index], 0, -1 * self.block_height)
-                self.update_board(self.num_col)
+                self.move_up()
 
         elif key == "Down":
 
             if self.can_move(-1, 0):
-                index = self.board.get_element(self.empty_pos - self.num_col)
-                self.canv.move(self.blocks[index], 0, self.block_height)
-                self.update_board(-1 * self.num_col)
+                self.move_down()
         
         self.board.print_grid()
         print("number of incorrect blocks:", self.num_incorrect)
 
 
     def shuffle(self):
+        
 
-        num_shuffle = self.num_col * self.num_row * 2
-        for i in range(num_shuffle):
-            pass
+        condition = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        moves = [self.move_left, self.move_right, self.move_up, self.move_down]
+
+        num_shuffle = self.num_col * self.num_row * 3
+        last_index = -1
+        while num_shuffle > 0:
+
+            index = rand.randrange(0, 4)
+            # avoid moving opposite directions immediately
+            if abs(index - last_index) == 1 and index + last_index != 3:
+                continue
+            
+            
+            (x, y) = condition[index]
+            if(self.can_move(x, y)):
+                
+                moves[index]()
+                self.update()
+                time.sleep(0.2)
+                last_index = index
+
+            num_shuffle -= 1
+            
+
 
 
     # testing purposes
@@ -231,14 +278,15 @@ if __name__ == '__main__':
 
     game = Game(num_row, num_col)
     game.pre_processing()
-    c = 0
-    while True:
-        game.update_idletasks()
-        game.update()
+    game.mainloop()
+    # c = 0
+    # while True:
+    #     game.update_idletasks()
+    #     game.update()
 
-        # if c > 10000:
-        #     game.draw_rect()
-        c += 1
+    #     # if c > 10000:
+    #     #     game.draw_rect()
+    #     c += 1
 
     print("hi")
     
