@@ -49,6 +49,13 @@ class Matrix:
         return self.grid[coord[0]][coord[1]]
 
 
+    # reset elements to be ordered
+    def reset(self):
+        
+        for i in range(self.height):
+            for j in range(self.width):
+                self.grid[i][j] = i * self.width + j
+
 
 # test_b = Matrix(3, 4)
 # # test_b.fill_grid()

@@ -15,7 +15,8 @@ Functionality:
         - Moves counter
         - Reshuffle
         - Restart
-        - 
+        - original image as reference
+        - id on each block?
 
 
 

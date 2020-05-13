@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox
 from PIL import ImageTk, Image, ImageOps
 import random as rand
 import Matrix as mat
@@ -26,7 +27,7 @@ class Game(tk.Tk):
         self.MAXSIZE = 760        
 
         # image setup
-        self.img_src = Image.open("images/hat.jpg")
+        self.img_src = Image.open("images/car.jpg")
         # for saving img objects references, otherwise, it won't be displayed on tk
         self.cropped_imgs = []
         self.blocks = []
@@ -35,24 +36,40 @@ class Game(tk.Tk):
         self.block_height = 0
 
         self.canv = None
-        self.button = tk.Button(self, text = 'Shuffle', command=self.shuffle)
-        self.button.pack()
+
         
+
+        self.frame_buttons = tk.Frame()
+        self.frame_buttons.grid(row = 0, column = 0, sticky = 'N')
+
+        self.button_shuffle = tk.Button(self.frame_buttons, text = 'Shuffle', command = self.shuffle)
+        self.button_restart = tk.Button(self.frame_buttons, text = 'Restart', command = self.restart)
+
+        self.button_shuffle.pack()#grid(row = 0, column = 0, sticky = 'N')
+        self.button_restart.pack()#grid(row = 0, column = 0)
+        
+        self.thumbnail = self.resize_img(self.MAXSIZE // 4)
+        self.tk_thumb = ImageTk.PhotoImage(self.thumbnail)
+        self.lab = tk.Label(image = self.tk_thumb)
+        self.lab.grid(row = 0, column = 0, sticky = 'S')
+        
+
+        # unbind when doing shuffling?
         self.bind("<Key>", self.move_block)
 
 
 
-    def resize_img(self):
+    def resize_img(self, max_size):
         
         width = self.img_src.width
         height = self.img_src.height
         
         # rescale width and height with same value to keep image undistorted
-        scale = max(width, height) // self.MAXSIZE
+        scale = max(width, height) // max_size
         new_width = int(width // scale)
         new_height = int(height // scale)
 
-        self.img_src = self.img_src.resize((new_width, new_height))
+        return self.img_src.resize((new_width, new_height))
 
 
 
@@ -66,12 +83,13 @@ class Game(tk.Tk):
 
         # Resize to predetermined max size if img too large
         if max(self.img_src.width, self.img_src.height) > self.MAXSIZE:
-            self.resize_img()
+            self.img_src = self.resize_img(self.MAXSIZE)
 
         # tkinter canvas setup
         # pack and grid are geometric managers
         self.canv = tk.Canvas(self, width=self.img_src.width, height=self.img_src.height)
-        self.canv.pack(fill="both", expand=True)
+        # self.canv.pack(fill="both", expand=True)
+        self.canv.grid(row = 0, column = 1)
 
         self.image_processing()
         
@@ -99,8 +117,8 @@ class Game(tk.Tk):
 
                 cropped_img = self.img_src.crop(coord)
 
-                strip_border = ImageOps.crop(cropped_img, border=5)
-                add_border = ImageOps.expand(strip_border, border=5)
+                strip_border = ImageOps.crop(cropped_img, border=2)
+                add_border = ImageOps.expand(strip_border, border=2)
 
                 tk_img = ImageTk.PhotoImage(add_border)
                 self.cropped_imgs.append(tk_img)
@@ -184,43 +202,36 @@ class Game(tk.Tk):
 
         key = event.keysym
         if key == "Left":
-
             if self.can_move(0, 1):
-
-                # # move the block in display
-                # index = self.board.get_element(self.empty_pos + 1)
-                # self.canv.move(self.blocks[index], -1 * self.block_width, 0)
-                # # calculate offset: left, right (+-1), up, down (+- width)
-                # self.update_board(1)
                 self.move_left()
                 
-
         elif key == "Right":
-            
             if self.can_move(0, -1):   
                 self.move_right()
 
         elif key == "Up":
-
             if self.can_move(1, 0):
                 self.move_up()
 
         elif key == "Down":
-
             if self.can_move(-1, 0):
                 self.move_down()
         
         self.board.print_grid()
         print("number of incorrect blocks:", self.num_incorrect)
 
+        if(self.num_incorrect == 0):
+            tk.messagebox.showinfo("Game info", "Well done!")
+            print("Done")
+
 
     def shuffle(self):
         
-
+        self.button_restart['state'] = 'disabled'
         condition = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         moves = [self.move_left, self.move_right, self.move_up, self.move_down]
 
-        num_shuffle = self.num_col * self.num_row * 3
+        num_shuffle = self.num_col * self.num_row * 4
         last_index = -1
         while num_shuffle > 0:
 
@@ -228,7 +239,6 @@ class Game(tk.Tk):
             # avoid moving opposite directions immediately
             if abs(index - last_index) == 1 and index + last_index != 3:
                 continue
-            
             
             (x, y) = condition[index]
             if(self.can_move(x, y)):
@@ -239,8 +249,45 @@ class Game(tk.Tk):
                 last_index = index
 
             num_shuffle -= 1
-            
+        
+        self.num_incorrect =  self.count_incorrect()
+        self.button_restart['state'] = 'normal'
 
+
+
+    def restart(self):
+        
+        # reset all blocks to its correct positions
+        self.board.reset()
+        self.board.print_grid()
+        self.num_incorrect = 0
+        self.empty_pos = self.num_col * self.num_row - 1
+
+        index = 0
+        for block in self.blocks:
+
+            (row, col) = self.board.convert(index)
+            pose = (col * self.block_width, row * self.block_height)
+            self.canv.coords(block, pose)
+            index += 1
+
+        # self.update()
+        # self.shuffle()
+
+
+    def count_incorrect(self):
+
+        index = 0
+        counter = 0
+        for i in range(self.num_row):
+            for j in range(self.num_col):
+                elem = self.board.grid[i][j]
+                # avoid couting the empty block
+                if  elem != index and elem != self.num_row * self.num_col - 1:
+                    counter += 1
+                index += 1
+
+        return counter
 
 
     # testing purposes
