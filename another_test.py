@@ -83,21 +83,31 @@
 # t.mainloop()
 
 
-import tkinter as tk
+# ------label buttons thumbnail---
+# import tkinter as tk
 
-root = tk.Tk()
+# root = tk.Tk()
 
-l1 = tk.Label(root, text="hello")
-l2 = tk.Label(root, text="world")
-f1 = tk.Frame(root)
-b1 = tk.Button(f1, text="One button")
-b2 = tk.Button(f1, text="Another button")
+# l1 = tk.Label(root, text="hello")
+# l2 = tk.Label(root, text="world")
+# f1 = tk.Frame(root)
+# b1 = tk.Button(f1, text="One button")
+# b2 = tk.Button(f1, text="Another button")
 
-l1.grid(row=0, column=0)
-l2.grid(row=0, column=1)
-f1.grid(row=1, column=1, sticky="nsew")
+# l1.grid(row=0, column=0)
+# l2.grid(row=0, column=1)
+# f1.grid(row=1, column=1, sticky="nsew")
 
-b1.pack(side="top")
-b2.pack(side="top")
+# b1.pack(side="top")
+# b2.pack(side="top")
 
-root.mainloop()
+# root.mainloop()
+
+
+
+
+# impressive generic solvers!
+# https://github.com/fabianokafor369/Sliding-puzzle-solver/blob/master/main.py
+# https://github.com/YahyaAlaaMassoud/Sliding-Puzzle-A-Star-Solver
+
+# puzzle = [[1, 13, 2, 3], [0, 6, 9, 7], [4, 10, 11, 15], [12, 5, 8, 14]]

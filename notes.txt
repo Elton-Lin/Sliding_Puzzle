@@ -27,8 +27,8 @@ Implementation:
 - Grid (independent from image?)
     - 2D list of integers represent order
     - Separation between blocks
-        - Static thin black lines on grid (make img/block smaller with margin or just overlay the lines)
-        - boarder around each image block
+        - Static thin lines on grid (make img/block smaller with margin or just overlay the lines) (no)
+        - boarder around each image block (same color as background so looks like empty gaps)
 
 - Puzzle game
     - forms the logic of the game
@@ -57,10 +57,20 @@ grid[][]: int
 6 7 5
 now it displays by walking thru grid to show img object in that order
 
-
-
 each move is a swap with empty(*)
 
 
 Variable naming
-- id instead of position?
+- id instead of position? (no)
+
+
+Problems:
+- when image is too small, buttons get covered (solved, using grid rowspan)
+- some .png images don't work well (screenshots png are find though)
+    seems to be some alpha plane issues: RGBA png is probably not supported by PIL/Tkinter
+    (solved, using flattenAlpha function)
+
+
+Improvements:
+- more felxible image resizing (based on screen size and ratio)
+

@@ -1,5 +1,3 @@
-
-
 class Matrix:
 
     # grid is a 2D list (maybe should use an array)

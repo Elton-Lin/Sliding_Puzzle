@@ -10,7 +10,7 @@ import time
 class Game(tk.Tk):
 
     # avoid logic in constructor, use another function
-    def __init__(self, num_row, num_col):
+    def __init__(self, num_row, num_col, path_to_img):
 
         tk.Tk.__init__(self)
 
@@ -18,7 +18,7 @@ class Game(tk.Tk):
         self.num_row = num_row
         self.num_col = num_col
         self.board = mat.Matrix(num_row, num_col)
-        self.board.print_grid()
+        # self.board.print_grid()
 
         # most important variable
         # positioin of the only empty block
@@ -27,7 +27,7 @@ class Game(tk.Tk):
         self.MAXSIZE = 760        
 
         # image setup
-        self.img_src = Image.open("images/car.jpg")
+        self.img_src = Image.open(path_to_img)
         # for saving img objects references, otherwise, it won't be displayed on tk
         self.cropped_imgs = []
         self.blocks = []
@@ -35,9 +35,15 @@ class Game(tk.Tk):
         self.block_width = 0
         self.block_height = 0
 
+        # tk canvas and widgets setup
         self.canv = None
-
+        self.create_widgets()
         
+        self.bind("<Key>", self.move_block)
+
+
+
+    def create_widgets(self):
 
         self.frame_buttons = tk.Frame()
         self.frame_buttons.grid(row = 0, column = 0, sticky = 'N')
@@ -45,31 +51,59 @@ class Game(tk.Tk):
         self.button_shuffle = tk.Button(self.frame_buttons, text = 'Shuffle', command = self.shuffle)
         self.button_restart = tk.Button(self.frame_buttons, text = 'Restart', command = self.restart)
 
-        self.button_shuffle.pack()#grid(row = 0, column = 0, sticky = 'N')
-        self.button_restart.pack()#grid(row = 0, column = 0)
-        
-        self.thumbnail = self.resize_img(self.MAXSIZE // 4)
-        self.tk_thumb = ImageTk.PhotoImage(self.thumbnail)
+        self.button_shuffle.pack()
+        self.button_restart.pack()
+
+        thumbnail = self.resize_img(self.MAXSIZE // 4)
+        if thumbnail.mode == "RGBA":
+            thumbnail = self.flattenAlpha(thumbnail)
+
+        self.tk_thumb = ImageTk.PhotoImage(thumbnail)
         self.lab = tk.Label(image = self.tk_thumb)
-        self.lab.grid(row = 0, column = 0, sticky = 'S')
-        
-
-        # unbind when doing shuffling?
-        self.bind("<Key>", self.move_block)
+        self.lab.grid(row = 1, column = 0, sticky = 'S')
 
 
 
+    # return a resized copy of img_src
     def resize_img(self, max_size):
         
         width = self.img_src.width
         height = self.img_src.height
         
+        # can be more complex to suit the screen since most screens are 16:9
         # rescale width and height with same value to keep image undistorted
-        scale = max(width, height) // max_size
+        scale = max(width, height) / max_size
         new_width = int(width // scale)
         new_height = int(height // scale)
 
         return self.img_src.resize((new_width, new_height))
+
+
+
+    # Resolve png RGBA format problems with PIL and tkinter
+    # https://stackoverflow.com/questions/41576637/are-rgba-pngs-unsupported-in-python-3-5-pillow
+    def flattenAlpha(self, img):
+        alpha = img.split()[-1]  # Pull off the alpha layer
+        ab = alpha.tobytes()  # Original 8-bit alpha
+
+        checked = []  # Create a new array to store the cleaned up alpha layer bytes
+
+        # Walk through all pixels and set them either to 0 for transparent or 255 for opaque fancy pants
+        transparent = 50  # change to suit your tolerance for what is and is not transparent
+
+        p = 0
+        for pixel in range(0, len(ab)):
+            if ab[pixel] < transparent:
+                checked.append(0)  # Transparent
+            else:
+                checked.append(255)  # Opaque
+            p += 1
+
+        mask = Image.frombytes('L', img.size, bytes(checked))
+
+        img.putalpha(mask)
+
+        return img
 
 
 
@@ -79,26 +113,27 @@ class Game(tk.Tk):
     # 4. Image processing - ...
     def pre_processing(self):
 
-        # might want to add the transparent RGBA conversion (flattenAlpha)
-
         # Resize to predetermined max size if img too large
         if max(self.img_src.width, self.img_src.height) > self.MAXSIZE:
             self.img_src = self.resize_img(self.MAXSIZE)
 
+        # print("image mode", self.img_src.mode)
+        # Deal with the transparent RGBA conversion (flattenAlpha)
+        if self.img_src.mode == "RGBA":
+            self.img_src = self.flattenAlpha(self.img_src)
+
         # tkinter canvas setup
         # pack and grid are geometric managers
         self.canv = tk.Canvas(self, width=self.img_src.width, height=self.img_src.height)
-        # self.canv.pack(fill="both", expand=True)
-        self.canv.grid(row = 0, column = 1)
+        self.canv.grid(row = 0, column = 1, rowspan = 2)
 
-        self.image_processing()
+        self.generate_puzzle_blocks()
         
-        # create a button for shuffle instead
-        # self.shuffle()
+
         
-    # partition image and assign each cropped images as blocks to a list
-    # draws the tk_image blocks on canvas        
-    def image_processing(self):
+    # 1. partition image and assign each cropped images as blocks to a list
+    # 2. draws the tk_image blocks on canvas        
+    def generate_puzzle_blocks(self):
 
         # deal with precission and rounding error later
         self.block_width = self.img_src.width // self.num_col
@@ -115,20 +150,20 @@ class Game(tk.Tk):
                         (j + 1) * self.block_width, (i + 1) * self.block_height)
                 print(coord)
 
+                # crop to blocks and create gaps between blocks for visual guidance
                 cropped_img = self.img_src.crop(coord)
+                stripped_border = ImageOps.crop(cropped_img, border=1)
+                # add_border = ImageOps.expand(strip_border, border=1)
 
-                strip_border = ImageOps.crop(cropped_img, border=2)
-                add_border = ImageOps.expand(strip_border, border=2)
-
-                tk_img = ImageTk.PhotoImage(add_border)
+                # tk_img = ImageTk.PhotoImage(add_border)
+                tk_img = ImageTk.PhotoImage(stripped_border)
                 self.cropped_imgs.append(tk_img)
 
                 block = self.canv.create_image(coord[0], coord[1], anchor='nw', image=tk_img)
                 self.blocks.append(block)
 
-        # self.canv.create_line([50, 50, 50, 150])
 
-    # fix variables names
+
     def update_board(self, offset):
 
         moving_block_pos = self.empty_pos + offset
@@ -141,7 +176,6 @@ class Game(tk.Tk):
         # 3. correct position into incorrect position
         # (correct position is unique)
 
-        # no
         if moving_elem != moving_block_pos:
             if moving_elem == self.empty_pos: # 1.
                 self.num_incorrect -= 1
@@ -157,18 +191,16 @@ class Game(tk.Tk):
 
     def can_move(self, offset_row, offset_col):
         
-        # print("checking", self.empty_pos)
         coord = self.board.convert(self.empty_pos)
-        # print("coord:", coord[0], coord[1])
-
         new_row = coord[0] + offset_row
         new_col = coord[1] + offset_col
 
-        if new_row >= 0 and new_row < num_row and\
-           new_col >= 0 and new_col < num_col:
+        if new_row >= 0 and new_row < self.num_row and\
+           new_col >= 0 and new_col < self.num_col:
             return True
         else:
             return False
+
 
 
     def move_left(self):
@@ -198,6 +230,7 @@ class Game(tk.Tk):
         self.update_board(-1 * self.num_col)
 
 
+
     def move_block(self, event):
 
         key = event.keysym
@@ -223,6 +256,7 @@ class Game(tk.Tk):
         if(self.num_incorrect == 0):
             tk.messagebox.showinfo("Game info", "Well done!")
             print("Done")
+
 
 
     def shuffle(self):
@@ -275,6 +309,7 @@ class Game(tk.Tk):
         # self.shuffle()
 
 
+
     def count_incorrect(self):
 
         index = 0
@@ -289,51 +324,3 @@ class Game(tk.Tk):
 
         return counter
 
-
-    # testing purposes
-    def draw_rect(self):
-
-        self.canv.create_rectangle(20, 20, 40, 40, fill='red')
-
-
-import sys
-
-if __name__ == '__main__':
-
-    # input image
-    # input dimensions: num_row, num_col (r*c)
-
-    # image processing - crop image and store as blocks
-    # pass blocks to game for display and animation
-    
-    # ----User input processing---
-    # if len(sys.argv) != 2:
-    #     print("Exiting...\nUsage: python3 puzzle.py path_to_img")
-    #     exit()
-
-    # img_path = sys.argv[1]
-
-    # print("Emter the dimensions to create a m x n puzzle")
-    # num_row = int(input("m (row): "))
-    # num_col = int(input("n (col): "))
-    # if num_row < 2 or num_col < 2:
-    #     print("Really? puzzle size needs to be greater than 2 x 2")
-    #     exit()
-
-    num_row = 4
-    num_col = 3
-
-    game = Game(num_row, num_col)
-    game.pre_processing()
-    game.mainloop()
-    # c = 0
-    # while True:
-    #     game.update_idletasks()
-    #     game.update()
-
-    #     # if c > 10000:
-    #     #     game.draw_rect()
-    #     c += 1
-
-    print("hi")
-    

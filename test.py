@@ -22,7 +22,7 @@
 # for b in img_list:
 #     b.show()
 
-
+# https://stackoverflow.com/questions/41576637/are-rgba-pngs-unsupported-in-python-3-5-pillow
 from PIL import Image
 
 def flattenAlpha(img):
@@ -58,8 +58,12 @@ if __name__ == "__main__":
     import tkinter as tk
 
     img = Image.open("images/mickey_mouse.png")
+    img2 = Image.open("images/avatar.png")
 
-    img = flattenAlpha(img)
+    print(img.mode, img2.mode)
+
+    # img = flattenAlpha(img)
+    # img = img.convert("RGB")
     root = tk.Tk()
 
     photo = ImageTk.PhotoImage(img)
