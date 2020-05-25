@@ -1,9 +1,9 @@
-import Game
+import game
 import sys
 
 if __name__ == '__main__':
     
-    print("what")
+    print("Starting...")
 
     # ----User input processing---
     if len(sys.argv) != 2:
@@ -21,14 +21,14 @@ if __name__ == '__main__':
         exit()
 
 
-    game = Game.Game(num_row, num_col, img_path)
-    game.pre_processing()
-    game.mainloop()
+    sliding_puzzle = game.Game(num_row, num_col, img_path)
+    sliding_puzzle.pre_processing()
+    sliding_puzzle.mainloop()
     
     # mainloop() is equilvalent to this:
     # while True:
-    #     game.update_idletasks()
-    #     game.update()
+    #     sliding_puzzle.update_idletasks()
+    #     sliding_puzzle.update()
 
     print("Game is exited")
     

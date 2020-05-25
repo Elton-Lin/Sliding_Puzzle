@@ -3,7 +3,7 @@ from collections import deque
 from enum import Enum
 import heapq
 
-import Matrix as Mat
+import matrix
 
 
 

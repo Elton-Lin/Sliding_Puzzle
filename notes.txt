@@ -82,7 +82,7 @@ It's graph search problem
 an unique state of the board can be represented as a node
 the goal state is the destination node
 
-Node rep:
+Node rep: use list for operation, str version to hash
 
 
 try BFS and A*

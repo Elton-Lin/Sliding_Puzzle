@@ -1,13 +1,13 @@
+import copy
 import random as rand
 import time
-import copy
 
-from PIL import ImageTk, Image, ImageOps
 import tkinter as tk
 import tkinter.messagebox
+from PIL import ImageTk, Image, ImageOps
 
-import Matrix as mat
-from Solver import Solver
+import matrix
+import solver
 
 
 
@@ -21,7 +21,7 @@ class Game(tk.Tk):
         # backend grid setup
         self.num_row = num_row
         self.num_col = num_col
-        self.board = mat.Matrix(num_row, num_col)
+        self.board = matrix.Matrix(num_row, num_col)
         # self.board.print_grid()
 
         # most important variable
@@ -267,8 +267,7 @@ class Game(tk.Tk):
 
     def shuffle(self):
         
-        self.button_restart['state'] = 'disabled'
-        self.button_solve['state'] = 'disabled'
+        self.control_buttons('disabled')
         condition = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         moves = [self.move_left, self.move_right, self.move_up, self.move_down]
 
@@ -292,9 +291,7 @@ class Game(tk.Tk):
             num_shuffle -= 1
         
         self.num_incorrect =  self.count_incorrect()
-
-        self.button_restart['state'] = 'normal'
-        self.button_solve['state'] = 'normal'
+        self.control_buttons('normal')
 
 
 
@@ -322,12 +319,11 @@ class Game(tk.Tk):
     def solve(self):
 
         board = copy.deepcopy(self.board.grid)
-        puzzle_solver = Solver(board, self.num_row, self.num_col)
+        puzzle_solver = solver.Solver(board, self.num_row, self.num_col)
         solutions = puzzle_solver.a_star()
         print(solutions)
 
-        self.button_restart['state'] = 'disabled'
-        self.button_shuffle['state'] = 'disabled'
+        self.control_buttons('disabled')
         moves = [self.move_left, self.move_right, self.move_up, self.move_down]
 
         for move in reversed(solutions):
@@ -335,8 +331,16 @@ class Game(tk.Tk):
             self.update()
             time.sleep(0.2)
 
-        self.button_restart['state'] = 'normal'
-        self.button_shuffle['state'] = 'normal'
+        self.control_buttons('normal')
+
+
+
+    def control_buttons(self, command):
+
+        self.button_restart['state'] = command
+        self.button_shuffle['state'] = command
+        self.button_solve['state'] = command
+
 
 
     def count_incorrect(self):
