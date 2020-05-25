@@ -74,3 +74,16 @@ Problems:
 Improvements:
 - more felxible image resizing (based on screen size and ratio)
 
+
+
+-------- solver ----------
+It's graph search problem
+
+an unique state of the board can be represented as a node
+the goal state is the destination node
+
+Node rep:
+
+
+try BFS and A*
+

@@ -1,9 +1,13 @@
+import random as rand
+import time
+import copy
+
+from PIL import ImageTk, Image, ImageOps
 import tkinter as tk
 import tkinter.messagebox
-from PIL import ImageTk, Image, ImageOps
-import random as rand
+
 import Matrix as mat
-import time
+import Solver as sol
 
 
 
@@ -50,9 +54,11 @@ class Game(tk.Tk):
 
         self.button_shuffle = tk.Button(self.frame_buttons, text = 'Shuffle', command = self.shuffle)
         self.button_restart = tk.Button(self.frame_buttons, text = 'Restart', command = self.restart)
+        self.button_solve = tk.Button(self.frame_buttons, text = 'Solve', command = self.solve)
 
         self.button_shuffle.pack()
         self.button_restart.pack()
+        self.button_solve.pack()
 
         thumbnail = self.resize_img(self.MAXSIZE // 4)
         if thumbnail.mode == "RGBA":
@@ -262,6 +268,7 @@ class Game(tk.Tk):
     def shuffle(self):
         
         self.button_restart['state'] = 'disabled'
+        self.button_solve['state'] = 'disabled'
         condition = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         moves = [self.move_left, self.move_right, self.move_up, self.move_down]
 
@@ -285,7 +292,9 @@ class Game(tk.Tk):
             num_shuffle -= 1
         
         self.num_incorrect =  self.count_incorrect()
+
         self.button_restart['state'] = 'normal'
+        self.button_solve['state'] = 'normal'
 
 
 
@@ -308,6 +317,26 @@ class Game(tk.Tk):
         # self.update()
         # self.shuffle()
 
+
+
+    def solve(self):
+
+        board = copy.deepcopy(self.board.grid)
+        puzzle_solver = sol.Solver(board, self.num_row, self.num_col)
+        solutions = puzzle_solver.a_star()
+        print(solutions)
+
+        self.button_restart['state'] = 'disabled'
+        self.button_shuffle['state'] = 'disabled'
+        moves = [self.move_left, self.move_right, self.move_up, self.move_down]
+
+        for move in reversed(solutions):
+            moves[move.value]() # value defined in the Move Enum class in Solver.py
+            self.update()
+            time.sleep(0.2)
+
+        self.button_restart['state'] = 'normal'
+        self.button_shuffle['state'] = 'normal'
 
 
     def count_incorrect(self):

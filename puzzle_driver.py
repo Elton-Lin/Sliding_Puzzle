@@ -3,6 +3,8 @@ import sys
 
 if __name__ == '__main__':
     
+    print("what")
+
     # ----User input processing---
     if len(sys.argv) != 2:
         print("Exiting...\nUsage: python3 puzzle.py path_to_img")
