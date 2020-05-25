@@ -1,0 +1,27 @@
+# Sliding_Puzzle
+A sliding puzzle game that supports user images and any size with a generic solver.
+
+
+## Install
+Clone the repository or copy/download all the python files.
+
+## Run
+In the directory of these files:
+```shell
+Pyhton3 puzzle_driver.py image_file_path
+```
+Close the GUI and the program will exit.
+
+## In-Game Details
+- The Shuffle button can be used multiple times to increase difficulty
+- The Solve button solves the puzzle and move the blocks automatically
+- The Restart button resumes the puzzle back to the ordered state
+
+## solve.py
+A generic(any size: mxn) sliding puzzle solving algorithm/ program
+- Solving the puzzle can be seen as a graph search problem
+- The "node" is simply the state of the puzzle. e.g. for a 2x2: [[2,0],[3,1]], and the goal state would be [[0,1],[2,3]].
+- Every valid "move" represents traversing from a node to another
+- This is a rather sparse graph (a node has at most 4 valid moves/ neighbors), but a factorial numbers of nodes.
+- Implements breadth first search and the A star algorithm (A*)
+- A* is significantly faster as expected
