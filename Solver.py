@@ -279,9 +279,13 @@ class Solver:
 # puzzle.print_grid()
 
 # p = [[0, 1, 3, 2], [4, 9, 11, 7], [8, 5, 6, 10]]
-# # p = [[7, 4, 0], [1, 6, 8], [3, 5, 2]]
+# p = [[7, 4, 0], [1, 6, 8], [3, 5, 2]]
 
 # p_solve = Solver(p, len(p), len(p[0]))
 # print(p_solve.a_star())
 # print(p_solve.bfs())
 # print(p_solve.backtrack())
+
+# p = [[1, 13, 2, 3], [0, 6, 9, 7], [4, 10, 11, 15], [12, 5, 8, 14]]
+# p_solve = Solver(p, len(p), len(p[0]))
+# print(p_solve.a_star())

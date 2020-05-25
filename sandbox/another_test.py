@@ -107,7 +107,8 @@
 
 
 # impressive generic solvers!
-# https://github.com/fabianokafor369/Sliding-puzzle-solver/blob/master/main.py
+# https://github.com/fabianokafor369/Sliding-puzzle-solver/blob/master/main.py (# pyhton2
+# CARE! the empty block is 0 in this code)
 # https://github.com/YahyaAlaaMassoud/Sliding-Puzzle-A-Star-Solver
 
 # puzzle = [[1, 13, 2, 3], [0, 6, 9, 7], [4, 10, 11, 15], [12, 5, 8, 14]]

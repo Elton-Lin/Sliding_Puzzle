@@ -7,7 +7,7 @@ import tkinter as tk
 import tkinter.messagebox
 
 import Matrix as mat
-import Solver as sol
+from Solver import Solver
 
 
 
@@ -322,7 +322,7 @@ class Game(tk.Tk):
     def solve(self):
 
         board = copy.deepcopy(self.board.grid)
-        puzzle_solver = sol.Solver(board, self.num_row, self.num_col)
+        puzzle_solver = Solver(board, self.num_row, self.num_col)
         solutions = puzzle_solver.a_star()
         print(solutions)
 
