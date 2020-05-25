@@ -25,3 +25,7 @@ A generic(any size: mxn) sliding puzzle solving algorithm/ program
 - This is a rather sparse graph (a node has at most 4 valid moves/ neighbors), but a factorial numbers of nodes.
 - Implements breadth first search and the A star algorithm (A*)
 - A* is significantly faster as expected
+
+## Todo
+- [ ] Clean up and remove shell output
+- [ ] Find optimization for solve.py
