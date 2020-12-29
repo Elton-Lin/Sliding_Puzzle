@@ -32,12 +32,14 @@ Notice that it took a shorter time, i.e. less moves, to solve the puzzle then th
 
 ## Generic Solver (Solver.py)
 A generic(any size: mxn) sliding puzzle solving algorithm/ program
-- Independent from the game process. I.e. it does not track previous user or shuffling movements.
+- Independent from the game process
+- It does not track previous user or shuffling movements. I.e. The solver starts with no knowledge about the puzzle (how it got here) except its current state/layout.
+
 Solving the puzzle can be seen as a graph search problem
 - The "node" is simply the state of the puzzle. e.g. for a 2x2: [[2,0],[3,1]], and the goal state would be [[0,1],[2,3]].
 - Every valid "move" represents traversing from a node to another
 - This is a rather sparse graph (a node has at most 4 valid moves/ neighbors), but a factorial numbers of nodes.
-Implements breadth first search and the A star algorithm (A*)
+- Implements breadth first search and the A star algorithm (A*)
 - A* is significantly faster as expected (seconds vs. mintues)
 
 ## Todo
