@@ -10,11 +10,19 @@ In the directory of these files:
 ```shell
 Pyhton3 puzzle_driver.py image_file_path
 ```
+e.g.
+```shell
+Pyhton3 puzzle_driver.py images/car.jpg
+```
+(This generally works for any .jpg or .png images you have.)
+
 Close the GUI and the program will exit.
 
 ## In-Game Details
+- Use arrow keys to slide the puzzle block
 - The Shuffle button can be used multiple times to increase difficulty
 - The Solve button solves the puzzle and move the blocks automatically
+  - For a puzzle larger than 3x3, it can take up to a few minutes to solve. The search space of the puzzle is O((mn)!). For example, a 4x4 would be 16! = 2e13
 - The Restart button resumes the puzzle back to the ordered state
 
 ## solve.py
